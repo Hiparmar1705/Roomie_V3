@@ -38,9 +38,19 @@ export default function LoginScreen({ navigation }) {
       return;
     }
 
+    if (!password.trim()) {
+      Alert.alert('Validation Error', 'Please enter your password.');
+      return;
+    }
+
     setLoading(true);
-    await login(identifier, role, password);
-    setLoading(false);
+    try {
+      await login(identifier, role, password);
+    } catch (error) {
+      Alert.alert('Login Failed', error.message || 'Unable to log in right now.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSignup = () => {
@@ -135,19 +145,18 @@ export default function LoginScreen({ navigation }) {
               <Text style={styles.inputLabel}>Password</Text>
               <View style={[styles.inputShell, isCompactScreen && styles.inputShellCompact]}>
                 <Ionicons name="lock-closed-outline" size={18} color={colors.textSecondary} />
-                <TextInput
-                  style={styles.input}
-                  placeholder="optional for now"
-                  placeholderTextColor={colors.textMuted}
-                  value={password}
-                  onChangeText={setPassword}
-                  secureTextEntry
-                />
-              </View>
-              {/* backend auth is not wired yet, so this stays optional for the demo */}
-              <Text style={[styles.helperText, isCompactScreen && styles.helperTextCompact]}>
-                you can still log in without entering a password in this demo.
-              </Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Enter your password"
+                placeholderTextColor={colors.textMuted}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+              />
+            </View>
+            <Text style={[styles.helperText, isCompactScreen && styles.helperTextCompact]}>
+              Use the password you set at signup, or `test123` for seeded backend demo accounts.
+            </Text>
             </View>
 
             <CustomButton

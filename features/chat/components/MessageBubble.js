@@ -1,9 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import colors from '../../../shared/constants/colors';
+import { USER_ROLES } from '../../../shared/constants/roles';
 
-export default function MessageBubble({ message }) {
-  const isOwnMessage = message.senderType === 'student';
+export default function MessageBubble({ message, userRole }) {
+  const expectedOwnSenderType = userRole === USER_ROLES.LANDLORD ? 'landlord' : 'student';
+  const isOwnMessage = message.senderType === expectedOwnSenderType;
   const isSystemMessage = message.senderType === 'system';
 
   if (isSystemMessage) {

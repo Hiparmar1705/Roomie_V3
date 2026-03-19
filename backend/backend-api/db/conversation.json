@@ -1,0 +1,32 @@
+[
+  {
+    "listingId": "1",
+    "listingTitle": "Cozy Room near UNBC",
+    "landlordName": "Alex Carter",
+    "landlordIdentifier": "2505551098",
+    "requesterIdentifier": "hparmar@unbc.ca",
+    "id": "conv_1773889173684",
+    "createdAt": "2026-03-19T02:59:33.684Z",
+    "updatedAt": "2026-03-19T02:59:58.778Z"
+  },
+  {
+    "listingId": "1773889408084",
+    "listingTitle": "Shared apartment room With 98 other people",
+    "landlordName": "Landlord",
+    "landlordIdentifier": "1234567890",
+    "requesterIdentifier": "1234567890",
+    "id": "conv_1773889416730",
+    "createdAt": "2026-03-19T03:03:36.730Z",
+    "updatedAt": "2026-03-19T03:03:36.730Z"
+  },
+  {
+    "listingId": "1773889408084",
+    "listingTitle": "Shared apartment room With 98 other people",
+    "landlordName": "Landlord",
+    "landlordIdentifier": "1234567890",
+    "requesterIdentifier": "hparmar@unbc.ca",
+    "id": "conv_1773890093816",
+    "createdAt": "2026-03-19T03:14:53.816Z",
+    "updatedAt": "2026-03-19T03:31:52.549Z"
+  }
+]

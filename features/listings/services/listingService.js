@@ -1,14 +1,7 @@
-import { DATA } from '../data/mockProperties';
 import { sanitizePhone } from '../../../shared/utils/validation';
 import { ROOM_TYPES } from '../constants/listings';
 import { USER_ROLES } from '../../../shared/constants/roles';
-
-const delay = (ms = 120) => new Promise((resolve) => setTimeout(resolve, ms));
-
-// this is the frontend-only listing store used until real api work is plugged in
-let listingStore = DATA.map((item) => ({ ...item }));
-// each user gets their own saved set so students do not share bookmarks
-const favoriteIdsByUserKey = new Map();
+import { apiRequest } from '../../../shared/services/apiClient';
 
 const normalizePrice = (value = '') =>
   Number(String(value).replace(/[^0-9.]/g, '')) || 0;
@@ -28,142 +21,137 @@ const buildOwnerKey = ({ identifier, role }) => {
   return `${role}:${normalizeIdentifierForRole({ identifier, role })}`;
 };
 
-const getUserFavoriteSet = (user) => {
-  const userKey = buildOwnerKey({
-    identifier: user?.identifier,
-    role: user?.role,
-  });
-
-  if (!userKey) {
-    return null;
-  }
-
-  if (!favoriteIdsByUserKey.has(userKey)) {
-    favoriteIdsByUserKey.set(userKey, new Set());
-  }
-
-  return favoriteIdsByUserKey.get(userKey);
-};
-
 export const getListings = async () => {
-  await delay();
-  return listingStore.map((item) => ({ ...item }));
+  try {
+    const result = await apiRequest('/listings');
+    return result.data;
+  } catch (error) {
+    console.error('Get listings error:', error);
+    throw error;
+  }
 };
 
 export const getListingsCreatedByUser = async (user) => {
-  await delay(40);
-  const ownerKey = buildOwnerKey({
-    identifier: user?.identifier,
-    role: user?.role,
-  });
+  try {
+    const userKey = buildOwnerKey({
+      identifier: user?.identifier,
+      role: user?.role,
+    });
 
-  if (!ownerKey) {
-    return [];
+    const result = await apiRequest(`/listings/user?createdByKey=${encodeURIComponent(userKey)}`);
+    return result.data;
+  } catch (error) {
+    console.error('Get user listings error:', error);
+    throw error;
   }
-
-  return listingStore
-    .filter((item) => item.createdByKey === ownerKey)
-    .map((item) => ({ ...item }));
 };
 
 export const getListingById = async (listingId) => {
-  await delay(50);
-  const listing = listingStore.find((item) => item.id === listingId);
-  return listing ? { ...listing } : null;
+  try {
+    const result = await apiRequest(`/listings/${listingId}`);
+    return result.data;
+  } catch (error) {
+    console.error('Get listing by ID error:', error);
+    throw error;
+  }
 };
 
 export const createListing = async (payload) => {
-  await delay();
+  try {
+    const cleanPrice = normalizePrice(payload.price);
 
-  const cleanPrice = normalizePrice(payload.price);
-  const createdByKey = buildOwnerKey({
-    identifier: payload.createdByIdentifier,
-    role: payload.createdByRole,
-  });
+    const listingData = {
+      title: payload.title.trim(),
+      price: `$${cleanPrice}/mo`,
+      priceAmount: cleanPrice,
+      imageUrl: payload.imageUrl,
+      type: payload.type,
+      description: payload.description.trim(),
+      location: payload.location.trim(),
+      distanceKm: Number(payload.distanceKm),
+      landlordName: payload.landlordName || 'New Landlord',
+      landlordIdentifier: payload.landlordIdentifier || '0000000000',
+      createdByIdentifier: normalizeIdentifierForRole({
+        identifier: payload.createdByIdentifier,
+        role: payload.createdByRole,
+      }),
+      createdByRole: payload.createdByRole,
+    };
 
-  const listing = {
-    id: String(Date.now()),
-    title: payload.title.trim(),
-    price: `$${cleanPrice}/mo`,
-    priceAmount: cleanPrice,
-    imageUrl: payload.imageUrl,
-    type: payload.type,
-    description: payload.description.trim(),
-    location: payload.location.trim(),
-    distanceKm: Number(payload.distanceKm),
-    landlordName: payload.landlordName || 'New Landlord',
-    landlordIdentifier: payload.landlordIdentifier || '0000000000',
-    createdByKey,
-  };
+    const result = await apiRequest('/listings', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(listingData),
+    });
 
-  // new posts go to the top so landlords see them right away on home
-  listingStore = [listing, ...listingStore];
-  return { ...listing };
+    return result.data;
+  } catch (error) {
+    console.error('Create listing error:', error);
+    throw error;
+  }
 };
 
 export const getFavoriteIds = async (user) => {
-  await delay(30);
-  const favoriteSet = getUserFavoriteSet(user);
-  return favoriteSet ? Array.from(favoriteSet) : [];
-};
-
-export const toggleFavorite = async (listingId, user) => {
-  await delay(40);
-  const favoriteSet = getUserFavoriteSet(user);
-  if (!favoriteSet) {
-    return false;
-  }
-
-  if (favoriteSet.has(listingId)) {
-    favoriteSet.delete(listingId);
-    return false;
-  }
-
-  favoriteSet.add(listingId);
-  return true;
-};
-
-export const isFavorite = async (listingId, user) => {
-  await delay(20);
-  const favoriteSet = getUserFavoriteSet(user);
-  return favoriteSet ? favoriteSet.has(listingId) : false;
-};
-
-export const getFavoriteListings = async (user) => {
-  await delay(50);
-  const favoriteSet = getUserFavoriteSet(user);
-  if (!favoriteSet) {
+  if (!user?.identifier) {
     return [];
   }
 
-  return listingStore
-    .filter((item) => favoriteSet.has(item.id))
-    .map((item) => ({ ...item }));
+  const result = await apiRequest(`/listings/favorites?userIdentifier=${encodeURIComponent(user.identifier)}`);
+  return result.data;
+};
+
+export const toggleFavorite = async (listingId, user) => {
+  if (!user?.identifier) {
+    return false;
+  }
+
+  const result = await apiRequest(`/listings/${listingId}/favorite`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      userIdentifier: user.identifier,
+    }),
+  });
+
+  return result.data.isFavorited;
+};
+
+export const isFavorite = async (listingId, user) => {
+  const favoriteIds = await getFavoriteIds(user);
+  return favoriteIds.includes(listingId);
+};
+
+export const getFavoriteListings = async (user) => {
+  if (!user?.identifier) {
+    return [];
+  }
+
+  const result = await apiRequest(
+    `/listings/favorites/listings?userIdentifier=${encodeURIComponent(user.identifier)}`
+  );
+  return result.data;
 };
 
 export const removeListingsByUser = async (user) => {
-  await delay(40);
-  const ownerKey = buildOwnerKey({
-    identifier: user?.identifier,
-    role: user?.role,
-  });
-
-  if (!ownerKey) {
-    return;
-  }
-
-  const removedIds = listingStore
-    .filter((item) => item.createdByKey === ownerKey)
-    .map((item) => item.id);
-
-  // landlord-created demo listings disappear after that landlord logs out
-  listingStore = listingStore.filter((item) => item.createdByKey !== ownerKey);
-
-  favoriteIdsByUserKey.forEach((favoriteSet) => {
-    removedIds.forEach((listingId) => {
-      favoriteSet.delete(listingId);
+  try {
+    const userKey = buildOwnerKey({
+      identifier: user?.identifier,
+      role: user?.role,
     });
-  });
+
+    const result = await apiRequest(`/listings/user?createdByKey=${encodeURIComponent(userKey)}`, {
+      method: 'DELETE',
+    });
+
+    return result.message;
+  } catch (error) {
+    console.error('Remove listings error:', error);
+    throw error;
+  }
 };
 
 export const filterListings = ({ listings, search, type, maxPrice, maxDistance }) => {

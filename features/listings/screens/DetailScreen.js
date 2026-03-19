@@ -13,6 +13,7 @@ export default function DetailScreen({ route, navigation }) {
   const { room } = route.params;
   const { user } = useAuth();
   const isStudent = user?.role === USER_ROLES.STUDENT;
+  const isOwnListing = user?.identifier === room.landlordIdentifier;
   const [isFavorite, setIsFavorite] = useState(false);
 
   useEffect(() => {
@@ -52,6 +53,7 @@ export default function DetailScreen({ route, navigation }) {
       landlordName: room.landlordName,
       landlordIdentifier: room.landlordIdentifier,
       requesterIdentifier: user?.identifier || 'guest',
+      requesterName: user?.displayName || user?.identifier || 'Student',
     });
 
     if (!conversation) {
@@ -61,7 +63,7 @@ export default function DetailScreen({ route, navigation }) {
 
     navigation.navigate(STACK_ROUTES.CHAT_ROOM, {
       conversationId: conversation.id,
-      landlordName: conversation.landlordName,
+      participantName: conversation.landlordName,
     });
   };
 
@@ -103,7 +105,9 @@ export default function DetailScreen({ route, navigation }) {
           <Text style={styles.mapButtonText}>View on Map</Text>
         </TouchableOpacity>
 
-        <CustomButton title="Contact Landlord" onPress={handleContactLandlord} />
+        {isStudent && !isOwnListing && (
+          <CustomButton title="Contact Landlord" onPress={handleContactLandlord} />
+        )}
       </View>
     </ScrollView>
   );

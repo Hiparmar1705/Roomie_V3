@@ -1,0 +1,77 @@
+[
+  {
+    "id": "1772672747057",
+    "email": "student@unbc.ca",
+    "name": "UNBC Student",
+    "phone": "+1 (250) 555-0100",
+    "avatar": "https://picsum.photos/400/400?random=1",
+    "password": "$2a$10$zoPBgxCqD48dxaRfmSwdV.ArjZjDdzMTyxbW5vd7EeVuVEDWAY52S",
+    "createdAt": "2026-03-05T01:05:47.057Z",
+    "identifier": "student@unbc.ca",
+    "role": "Student",
+    "displayName": "UNBC Student",
+    "bio": "",
+    "location": "Prince George, BC",
+    "profileImageUri": "https://picsum.photos/400/400?random=1",
+    "favoriteListingIds": []
+  },
+  {
+    "id": "1772672747058",
+    "email": "john.doe@unbc.ca",
+    "name": "John Doe",
+    "phone": "+1 (250) 555-0101",
+    "avatar": "https://picsum.photos/400/400?random=2",
+    "password": "$2a$10$CfwdYMR2bEP9smn34rnLGeBvpFEv.xBlSCQo9DgR2B0APzZnKgwN.",
+    "createdAt": "2026-03-05T01:05:47.057Z",
+    "identifier": "john.doe@unbc.ca",
+    "role": "Student",
+    "displayName": "John Doe",
+    "bio": "",
+    "location": "Prince George, BC",
+    "profileImageUri": "https://picsum.photos/400/400?random=2",
+    "favoriteListingIds": []
+  },
+  {
+    "id": "1772672747059",
+    "email": "jane.smith@unbc.ca",
+    "name": "Jane Smith",
+    "phone": "+1 (250) 555-0102",
+    "avatar": "https://picsum.photos/400/400?random=3",
+    "password": "$2a$10$/.0IG1ZsQ8Kitr1afL3sGukr0EipjrG9Ikrb2BAfMGok5pDgDYoT.",
+    "createdAt": "2026-03-05T01:05:47.057Z",
+    "identifier": "jane.smith@unbc.ca",
+    "role": "Student",
+    "displayName": "Jane Smith",
+    "bio": "",
+    "location": "Prince George, BC",
+    "profileImageUri": "https://picsum.photos/400/400?random=3",
+    "favoriteListingIds": []
+  },
+  {
+    "id": "1773889158847",
+    "identifier": "hparmar@unbc.ca",
+    "role": "Student",
+    "displayName": "Himanshu Parmar",
+    "bio": "",
+    "location": "Prince George, BC",
+    "profileImageUri": "",
+    "password": "$2a$10$bY4YZpsdm8GafyCN1S.aBe.yKzk76fOEW4hg4S./q1XvcRFD0O8Vu",
+    "createdAt": "2026-03-19T02:59:18.847Z",
+    "favoriteListingIds": [
+      "1",
+      "2"
+    ]
+  },
+  {
+    "id": "1773889286056",
+    "identifier": "1234567890",
+    "role": "Landlord",
+    "displayName": "Landlord",
+    "bio": "",
+    "location": "Prince George, BC",
+    "profileImageUri": "",
+    "password": "$2a$10$lofrEWYESjS7HozL9PUwoe78XpPbQVi71SRn.3jeCuPlOnyest2g6",
+    "createdAt": "2026-03-19T03:01:26.056Z",
+    "favoriteListingIds": []
+  }
+]

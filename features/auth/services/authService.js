@@ -1,96 +1,85 @@
 import { sanitizePhone } from '../../../shared/utils/validation';
 import { USER_ROLES } from '../../../shared/constants/roles';
-
-// this stays in memory only, so it resets when the app fully reloads
-const mockUsersByKey = {};
+import { apiRequest } from '../../../shared/services/apiClient';
 
 const delay = (ms = 120) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const formatNameFromIdentifier = (identifier = '', role) => {
-  if (role === USER_ROLES.STUDENT) {
-    const localPart = identifier.split('@')[0] || '';
-    if (localPart) {
-      // turn something like sam_lee into sam lee
-      return localPart
-        .replace(/[._-]+/g, ' ')
-        .replace(/\b\w/g, (char) => char.toUpperCase());
-    }
-  }
-
-  return role === USER_ROLES.LANDLORD ? 'Landlord' : 'Roomie Member';
-};
-
-const normalizeIdentifier = ({ identifier, role }) => {
+const normalizeIdentifierForRole = ({ identifier = '', role }) => {
   if (role === USER_ROLES.LANDLORD) {
     return sanitizePhone(identifier);
   }
+
   return identifier.trim().toLowerCase();
 };
 
-// role + identifier together make one stable mock account key
-const buildUserKey = ({ identifier, role }) => `${role}:${normalizeIdentifier({ identifier, role })}`;
-
 export const login = async ({ identifier, role, password = '' }) => {
-  await delay();
+  try {
+    const result = await apiRequest('/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        identifier: normalizeIdentifierForRole({ identifier, role }),
+        password,
+      }),
+    });
 
-  const normalizedIdentifier = normalizeIdentifier({ identifier, role });
-  const userKey = buildUserKey({ identifier: normalizedIdentifier, role });
-
-  // first login creates a basic mock profile if we have never seen this user before
-  if (!mockUsersByKey[userKey]) {
-    mockUsersByKey[userKey] = {
-      identifier: normalizedIdentifier,
-      role,
-      displayName: formatNameFromIdentifier(normalizedIdentifier, role),
-      bio: '',
-      location: 'Prince George, BC',
-      profileImageUri: '',
-      lastLoginPasswordLength: password.length,
-    };
+    // Store token (you might want to use AsyncStorage or SecureStore)
+    // For now, just return the user data
+    return result.data.user;
+  } catch (error) {
+    console.error('Login error:', error);
+    throw error;
   }
-
-  mockUsersByKey[userKey] = {
-    ...mockUsersByKey[userKey],
-    lastLoginPasswordLength: password.length,
-  };
-
-  return mockUsersByKey[userKey];
 };
 
 export const signup = async ({ identifier, role, password, displayName }) => {
-  await delay();
+  try {
+    const result = await apiRequest('/auth/register', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        identifier: normalizeIdentifierForRole({ identifier, role }),
+        role,
+        displayName,
+        password,
+        bio: '',
+        location: 'Prince George, BC',
+      }),
+    });
 
-  const normalizedIdentifier = normalizeIdentifier({ identifier, role });
-  const userKey = buildUserKey({ identifier: normalizedIdentifier, role });
-
-  // signup stores a fuller profile than login does because the form asks for a name
-  mockUsersByKey[userKey] = {
-    identifier: normalizedIdentifier,
-    role,
-    displayName: displayName.trim(),
-    bio: '',
-    location: 'Prince George, BC',
-    profileImageUri: '',
-    passwordHintLength: password.length,
-  };
-
-  return mockUsersByKey[userKey];
+    // Store token
+    return result.data.user;
+  } catch (error) {
+    console.error('Signup error:', error);
+    throw error;
+  }
 };
 
 export const updateProfile = async ({ user, updates }) => {
-  await delay(80);
-  const userKey = buildUserKey({ identifier: user.identifier, role: user.role });
+  try {
+    const result = await apiRequest(`/auth/profile/${user.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        // Add authorization header if you have token storage
+        // 'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify(updates),
+    });
 
-  // profile edits overwrite the stored mock user so the next screen sees fresh data
-  const nextUser = {
-    ...user,
-    ...updates,
-  };
-
-  mockUsersByKey[userKey] = nextUser;
-  return nextUser;
+    return result.data;
+  } catch (error) {
+    console.error('Update profile error:', error);
+    throw error;
+  }
 };
 
 export const logout = async () => {
+  // Clear any stored tokens
+  // For now, just a simple delay
   await delay(40);
 };

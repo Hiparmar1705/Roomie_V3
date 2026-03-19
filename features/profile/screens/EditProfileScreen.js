@@ -61,16 +61,21 @@ export default function EditProfileScreen({ navigation }) {
     }
 
     setSaving(true);
-    await updateProfile({
-      displayName: displayName.trim(),
-      location: location.trim(),
-      bio: bio.trim(),
-      profileImageUri,
-    });
-    setSaving(false);
+    try {
+      await updateProfile({
+        displayName: displayName.trim(),
+        location: location.trim(),
+        bio: bio.trim(),
+        profileImageUri,
+      });
 
-    Alert.alert('Profile Updated', 'Your profile has been updated.');
-    navigation.goBack();
+      Alert.alert('Profile Updated', 'Your profile has been updated.');
+      navigation.goBack();
+    } catch (error) {
+      Alert.alert('Update Failed', error.message || 'Unable to save your profile right now.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (

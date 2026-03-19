@@ -1,0 +1,65 @@
+[
+  {
+    "id": "msg_1773889173687",
+    "conversationId": "conv_1773889173684",
+    "senderType": "system",
+    "senderName": "Roomie",
+    "text": "Conversation started for \"Cozy Room near UNBC\".",
+    "createdAt": "2026-03-19T02:59:33.687Z",
+    "createdByKey": null
+  },
+  {
+    "conversationId": "conv_1773889173684",
+    "senderType": "student",
+    "senderName": "Himanshu Parmar",
+    "text": "Hello",
+    "createdByKey": "Student:hparmar@unbc.ca",
+    "id": "msg_1773889186867",
+    "createdAt": "2026-03-19T02:59:46.867Z"
+  },
+  {
+    "conversationId": "conv_1773889173684",
+    "senderType": "student",
+    "senderName": "Himanshu Parmar",
+    "text": "Is this available",
+    "createdByKey": "Student:hparmar@unbc.ca",
+    "id": "msg_1773889198778",
+    "createdAt": "2026-03-19T02:59:58.778Z"
+  },
+  {
+    "id": "msg_1773889416732",
+    "conversationId": "conv_1773889416730",
+    "senderType": "system",
+    "senderName": "Roomie",
+    "text": "Conversation started for \"Shared apartment room With 98 other people\".",
+    "createdAt": "2026-03-19T03:03:36.732Z",
+    "createdByKey": null
+  },
+  {
+    "id": "msg_1773890093820",
+    "conversationId": "conv_1773890093816",
+    "senderType": "system",
+    "senderName": "Roomie",
+    "text": "Conversation started for \"Shared apartment room With 98 other people\".",
+    "createdAt": "2026-03-19T03:14:53.820Z",
+    "createdByKey": null
+  },
+  {
+    "conversationId": "conv_1773890093816",
+    "senderType": "student",
+    "senderName": "Himanshu Parmar",
+    "text": "hey is this available?",
+    "createdByKey": "Student:hparmar@unbc.ca",
+    "id": "msg_1773890104941",
+    "createdAt": "2026-03-19T03:15:04.941Z"
+  },
+  {
+    "conversationId": "conv_1773890093816",
+    "senderType": "student",
+    "senderName": "Himanshu Parmar",
+    "text": "Gurt: Yo!",
+    "createdByKey": "Student:hparmar@unbc.ca",
+    "id": "msg_1773891112549",
+    "createdAt": "2026-03-19T03:31:52.549Z"
+  }
+]

@@ -37,8 +37,13 @@ export default function SignupScreen({ navigation, route }) {
     }
 
     setLoading(true);
-    await signup(identifier, role, password, displayName.trim());
-    setLoading(false);
+    try {
+      await signup(identifier, role, password, displayName.trim());
+    } catch (error) {
+      Alert.alert('Signup Failed', error.message || 'Unable to create your account right now.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

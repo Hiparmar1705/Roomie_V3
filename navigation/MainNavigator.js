@@ -80,7 +80,7 @@ export default function MainNavigator() {
         component={ChatScreen}
         options={({ route }) => ({
           headerShown: true,
-          title: route.params?.landlordName || TAB_ROUTES.CHAT,
+          title: route.params?.participantName || TAB_ROUTES.CHAT,
           headerTintColor: colors.primary,
         })}
       />

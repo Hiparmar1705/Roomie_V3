@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet, TextInput } from 'react-native';
+import { View, Text, FlatList, StyleSheet, TextInput, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import colors from '../../../shared/constants/colors';
@@ -7,24 +7,38 @@ import MessageBubble from '../components/MessageBubble';
 import * as chatService from '../services/chatService';
 import CustomButton from '../../../shared/components/CustomButton';
 import { useAuth } from '../../auth/hooks/useAuth';
+import { USER_ROLES } from '../../../shared/constants/roles';
 
 export default function ChatScreen({ route }) {
-  const { conversationId } = route.params;
+  const { conversationId, participantName } = route.params;
   const { user } = useAuth();
   const [messages, setMessages] = useState([]);
   const [conversation, setConversation] = useState(null);
   const [draft, setDraft] = useState('');
   const [sending, setSending] = useState(false);
+  const isLandlord = user?.role === USER_ROLES.LANDLORD;
+  const titleName =
+    participantName ||
+    (isLandlord
+      ? conversation?.requesterName || conversation?.requesterIdentifier || 'Student'
+      : conversation?.landlordName || 'Landlord');
+  const subtitle = conversation?.listingTitle
+    ? `Regarding: ${conversation.listingTitle}`
+    : 'Listing conversation';
 
   const loadConversation = async () => {
-    // load both the chat shell and the message list together for one screen refresh
-    const [conversationResponse, messagesResponse] = await Promise.all([
-      chatService.getConversationById(conversationId, user),
-      chatService.getMessages(conversationId, user),
-    ]);
+    try {
+      // load both the chat shell and the message list together for one screen refresh
+      const [conversationResponse, messagesResponse] = await Promise.all([
+        chatService.getConversationById(conversationId, user),
+        chatService.getMessages(conversationId, user),
+      ]);
 
-    setConversation(conversationResponse);
-    setMessages(messagesResponse);
+      setConversation(conversationResponse);
+      setMessages(messagesResponse);
+    } catch (error) {
+      Alert.alert('Chat Error', error.message || 'Unable to load this conversation right now.');
+    }
   };
 
   useEffect(() => {
@@ -37,27 +51,37 @@ export default function ChatScreen({ route }) {
     }
 
     setSending(true);
-    await chatService.sendMessage({
-      conversationId,
-      text: draft,
-      user,
-    });
-    setDraft('');
-    setSending(false);
-    // reload after sending so the demo behaves like a tiny realtime loop
-    loadConversation();
+    try {
+      await chatService.sendMessage({
+        conversationId,
+        text: draft,
+        user,
+      });
+      setDraft('');
+      // reload after sending so the demo behaves like a tiny realtime loop
+      loadConversation();
+    } catch (error) {
+      Alert.alert('Send Failed', error.message || 'Unable to send your message right now.');
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.listing}>{conversation?.listingTitle || 'Conversation'}</Text>
-        <Text style={styles.readOnly}>Demo messaging is enabled on the frontend.</Text>
+        <Text style={styles.participant}>{titleName}</Text>
+        <Text style={styles.listing}>{subtitle}</Text>
+        <Text style={styles.readOnly}>
+          {isLandlord
+            ? 'Reply to this student about your listing.'
+            : 'Messages are synced with the backend API.'}
+        </Text>
       </View>
       <FlatList
         data={messages}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <MessageBubble message={item} />}
+        renderItem={({ item }) => <MessageBubble message={item} userRole={user?.role} />}
         contentContainerStyle={styles.listContent}
       />
       <View style={styles.composer}>
@@ -65,7 +89,7 @@ export default function ChatScreen({ route }) {
           <Ionicons name="chatbubble-ellipses-outline" size={18} color={colors.textMuted} />
           <TextInput
             style={styles.input}
-            placeholder="Send a demo message..."
+            placeholder="Send a message..."
             placeholderTextColor={colors.textMuted}
             value={draft}
             onChangeText={setDraft}
@@ -95,7 +119,13 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.border,
     backgroundColor: colors.background,
   },
+  participant: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: colors.textPrimary,
+  },
   listing: {
+    marginTop: 4,
     fontSize: 15,
     fontWeight: '700',
     color: colors.primary,

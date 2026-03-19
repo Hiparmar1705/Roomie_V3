@@ -7,12 +7,14 @@ import colors from '../../../shared/constants/colors';
 import * as chatService from '../services/chatService';
 import { STACK_ROUTES } from '../../../shared/constants/navigation';
 import { useAuth } from '../../auth/hooks/useAuth';
+import { USER_ROLES } from '../../../shared/constants/roles';
 
 const formatDate = (isoDate) => new Date(isoDate).toLocaleDateString();
 
 export default function ChatListScreen({ navigation }) {
   const { user } = useAuth();
   const [conversations, setConversations] = useState([]);
+  const isLandlord = user?.role === USER_ROLES.LANDLORD;
 
   const loadConversations = useCallback(async () => {
     // refetch on focus so new demo chats show up after leaving a listing
@@ -26,18 +28,23 @@ export default function ChatListScreen({ navigation }) {
     }, [loadConversations])
   );
 
-  const renderItem = ({ item }) => (
+  const renderItem = ({ item }) => {
+    const participantName = isLandlord
+      ? item.requesterName || item.requesterIdentifier || 'Student'
+      : item.landlordName;
+
+    return (
     <TouchableOpacity
       style={styles.chatItem}
       onPress={() =>
         navigation.navigate(STACK_ROUTES.CHAT_ROOM, {
           conversationId: item.id,
-          landlordName: item.landlordName,
+          participantName,
         })
       }
     >
       <View style={styles.topRow}>
-        <Text style={styles.name}>{item.landlordName}</Text>
+        <Text style={styles.name}>{participantName}</Text>
         <Text style={styles.date}>{formatDate(item.lastMessageAt)}</Text>
       </View>
       <Text style={styles.listingTitle}>{item.listingTitle}</Text>
@@ -45,13 +52,18 @@ export default function ChatListScreen({ navigation }) {
         {item.lastMessageText}
       </Text>
     </TouchableOpacity>
-  );
+    );
+  };
 
   return (
     <SafeAreaView style={styles.container}>
       <Text style={styles.eyebrow}>Inbox</Text>
       <Text style={styles.title}>Messages</Text>
-      <Text style={styles.subtitle}>Review listing conversations and keep track of landlord replies.</Text>
+      <Text style={styles.subtitle}>
+        {isLandlord
+          ? 'Review student inquiries and reply about your listings.'
+          : 'Review listing conversations and keep track of landlord replies.'}
+      </Text>
       <FlatList
         data={conversations}
         renderItem={renderItem}
@@ -61,7 +73,11 @@ export default function ChatListScreen({ navigation }) {
           <View style={styles.emptyState}>
             <Ionicons name="chatbubble-ellipses-outline" size={30} color={colors.textMuted} />
             <Text style={styles.emptyTitle}>No conversations yet</Text>
-            <Text style={styles.emptyText}>Open a listing and tap Contact Landlord to start one.</Text>
+            <Text style={styles.emptyText}>
+              {isLandlord
+                ? 'Student inquiries for your listings will appear here.'
+                : 'Open a listing and tap Contact Landlord to start one.'}
+            </Text>
           </View>
         }
       />

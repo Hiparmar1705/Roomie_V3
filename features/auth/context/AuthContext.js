@@ -1,7 +1,5 @@
 import React, { createContext, useState, useContext } from 'react';
 import * as authService from '../services/authService';
-import * as listingService from '../../listings/services/listingService';
-import * as chatService from '../../chat/services/chatService';
 
 const AuthContext = createContext();
 
@@ -34,10 +32,6 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    const currentUser = user;
-    // clear demo data tied to this user before dropping auth state
-    await listingService.removeListingsByUser(currentUser);
-    await chatService.clearChatDataForUser(currentUser);
     await authService.logout();
     setUser(null);
   };

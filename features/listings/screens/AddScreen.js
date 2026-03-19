@@ -45,11 +45,15 @@ export default function AddScreen() {
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 1,
+      quality: 0.7,
+      base64: true,
     });
 
     if (!result.canceled) {
-      setSelectedImage(result.assets[0].uri);
+      const asset = result.assets[0];
+      const mimeType = asset.mimeType || 'image/jpeg';
+      const persistentImageUrl = asset.base64 ? `data:${mimeType};base64,${asset.base64}` : asset.uri;
+      setSelectedImage(persistentImageUrl);
     }
   };
 
@@ -72,18 +76,22 @@ export default function AddScreen() {
     }
 
     setSubmitting(true);
-    // this posts into the frontend mock store, not a real backend yet
-    await listingService.createListing({
-      ...payload,
-      landlordName: user?.displayName || 'Landlord',
-      landlordIdentifier: user?.role === USER_ROLES.LANDLORD ? sanitizePhone(user.identifier) : '0000000000',
-      createdByIdentifier: user?.identifier,
-      createdByRole: user?.role,
-    });
-    setSubmitting(false);
+    try {
+      await listingService.createListing({
+        ...payload,
+        landlordName: user?.displayName || 'Landlord',
+        landlordIdentifier: user?.role === USER_ROLES.LANDLORD ? sanitizePhone(user.identifier) : '0000000000',
+        createdByIdentifier: user?.identifier,
+        createdByRole: user?.role,
+      });
 
-    Alert.alert('Listing Posted', 'Your listing is now available in Home.');
-    resetForm();
+      Alert.alert('Listing Posted', 'Your listing is now available in Home.');
+      resetForm();
+    } catch (error) {
+      Alert.alert('Listing Failed', error.message || 'Unable to create the listing right now.');
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
